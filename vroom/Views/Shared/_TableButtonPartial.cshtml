@@ -1,0 +1,9 @@
+﻿@model int
+<td class="text-right">
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-warning text-black-50" asp-action="Edit" asp-route-Id="@Model"> <i class="fa fa-edit"></i></a>
+        <form method="post" asp-action="Delete">
+            <button onclick="return confirm('Are u sure, want to delete this item')" type="submit" class="btn btn-outline-danger" asp-action="Delete" asp-route-Id="@Model"><i class="fa fa-trash"></i> </button>
+        </form>
+    </div>
+</td>
