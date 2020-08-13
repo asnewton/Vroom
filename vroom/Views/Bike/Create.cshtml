@@ -6,6 +6,35 @@
 }
 
 <br />
+
+<script>
+    $(document).ready(function () {
+        var ModelDdl = $("#ModelDdl");
+        var MakeDdl =$("#MakeDdl");
+        ModelDdl.prop('disabled', true);
+        MakeDdl.on("change", function () {
+            var value = $(this).val();
+            if (value == '0') {
+                ModelDdl.prop('disabled', true);
+                ModelDdl.val(0);
+            } else {                
+                $.ajax({
+                    url: "/api/models/" + value,
+                    method: "GET",
+                    success: function (response) {
+                        ModelDdl.prop('disabled', false);
+                        ModelDdl.empty();
+                        ModelDdl.append($('<option/>', { value: "0", text: "----Select----" }));
+                        $(response).each(function (index, item) {
+                            ModelDdl.append($('<option/>', { value: item.id, text: item.name }));
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+
 <h2 class="text-info">Add Bike</h2>
 <form asp-action="Create" method="post" enctype="multipart/form-data">
     <div class="form-group row">
@@ -13,7 +42,7 @@
             <label asp-for="Makes"></label>
         </div>
         <div class="col-4">
-            <select asp-for="Bike.MakeID" asp-items="Model.Makes.ToSelectListItem()" class="form-control">
+            <select id="MakeDdl" asp-for="Bike.MakeID" asp-items="Model.Makes.ToSelectListItem()" class="form-control">
             </select>
         </div>
         <div class="col-1">
@@ -28,7 +57,7 @@
             <label asp-for="Models"></label>
         </div>
         <div class="col-4">
-            <select asp-for="Bike.ModelID" asp-items="Model.Models.ToSelectListItem()" class="form-control">
+            <select id="ModelDdl" asp-for="Bike.ModelID" asp-items="Model.Models.ToSelectListItem()" class="form-control">
             </select>
         </div>
     </div>

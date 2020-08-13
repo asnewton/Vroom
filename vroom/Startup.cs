@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using vroom.AppDbContext;
 using vroom.Data;
+using AutoMapper;
+using vroom.MappingProfiles;
 
 namespace vroom
 {
@@ -28,6 +30,7 @@ namespace vroom
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddAutoMapper(typeof(MappingProfile));
             services.AddDbContext<VroomDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<VroomDbContext>().AddDefaultUI()

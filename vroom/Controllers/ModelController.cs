@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vroom.AppDbContext;
+using vroom.Controllers.Resources;
 using vroom.Models;
 using vroom.Models.ViewModels;
 
@@ -15,12 +17,14 @@ namespace vroom.Controllers
     public class ModelController : Controller
     {
         private readonly VroomDbContext _db;
+        private readonly IMapper _mapper;
 
         [BindProperty]
         public ModelViewModel ModelVM { get; set; }
-        public ModelController(VroomDbContext db)
+        public ModelController(VroomDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
             ModelVM = new ModelViewModel()
             {
                 Makes = _db.Makes.ToList(),
@@ -88,6 +92,36 @@ namespace vroom.Controllers
             _db.Models.Remove(model);
             _db.SaveChanges();
             return RedirectToAction(nameof(Index));
+        }
+
+        [AllowAnonymous]
+        [HttpGet("api/models/{MakeId}")]
+        public IEnumerable<Model> Models(int MakeId)
+        {
+            return _db.Models.ToList().Where(m => m.MakeID == MakeId);
+        }
+        
+        [AllowAnonymous]
+        [HttpGet("api/models")]
+        public IEnumerable<ModelResources> Models()
+        {
+            // without automapper
+            var models =  _db.Models.ToList();
+            //var modelResources = models.Select(m => new ModelResources()
+            //{
+            //    Id = m.Id,
+            //    Name=m.Name
+            //}).ToList();
+
+            // with automapper
+            //var config = new MapperConfiguration(mc => mc.CreateMap<Model, ModelResources>());
+            //var mapper = new Mapper(config);
+            //var modelResources = mapper.Map<List<Model>, List<ModelResources>>(models);
+
+            // automapper globally
+            var modelResources = _mapper.Map<List<Model>, List<ModelResources>>(models);
+
+            return modelResources;
         }
 
 
