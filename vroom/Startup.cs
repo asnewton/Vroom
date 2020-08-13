@@ -36,6 +36,7 @@ namespace vroom
                 .AddEntityFrameworkStores<VroomDbContext>().AddDefaultUI()
                 .AddDefaultTokenProviders();
             services.AddScoped<IDBInitializer, DBInitializer>();
+            services.AddCloudscribePagination();
             services.AddRazorPages();
         }
 

@@ -11,6 +11,7 @@ using vroom.Models.ViewModels;
 using System.IO;
  using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.Hosting;
+using cloudscribe.Pagination.Models;
 
 namespace vroom.Controllers
 {
@@ -32,13 +33,40 @@ namespace vroom.Controllers
                 Models = _db.Models.ToList(),
                 Bike = new Bike()
             };
-        }
+        }         
 
-
-        public IActionResult Index()
+        [AllowAnonymous]
+        public IActionResult Index(string searchString, string sortOrder,int pageNumber=1, int pageSize=2)
         {
-            var model = _db.Bikes.Include(m => m.Make).Include(m=>m.Model);
-            return View(model);
+            ViewBag.currentSortOrder = sortOrder;
+            ViewBag.currentSearchString = searchString;
+            ViewBag.PriceSortParam = String.IsNullOrEmpty(sortOrder) ? "sord_desc" : "";
+            int ExcludeRecords = (pageNumber * pageSize) - pageSize;
+            var bikes = from b in _db.Bikes.Include(m => m.Make).Include(m => m.Model) select b;
+            var bikesCount = bikes.Count();
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                bikes = bikes.Where(x => x.Make.Name.Contains(searchString));
+                bikesCount = bikes.Count();
+            }
+            switch (sortOrder)
+            {
+                case "sord_desc":
+                   bikes= bikes.OrderByDescending(x => x.Price);
+                    break;
+                default:
+                    bikes = bikes.OrderBy(x => x.Price);
+                    break;
+            }
+            var model = bikes.Skip(ExcludeRecords).Take(pageSize);
+            var result = new PagedResult<Bike>
+            {
+                Data = model.AsNoTracking().ToList(),
+                TotalItems = bikesCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            return View(result);
         }
 
         public IActionResult Create()

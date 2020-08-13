@@ -1,18 +1,33 @@
-﻿ 
-@model IEnumerable<vroom.Models.Bike>
+﻿
+@model cloudscribe.Pagination.Models.PagedResult<Bike>
+@using vroom.Helpers
 @{
     ViewData["Title"] = "Index";
+    ViewData["Controller"] = "Bike";
+    ViewData["Action"] = "Index";
 }
 
 <br />
 <br />
 <br />
+<form asp-action="Index" method="get">
+    <div>
+        <p>
+            Find Make: <input type="text" name="searchString" value="@ViewBag.currentSearchString" />
+            <input type="submit" value="Search" class="btn btn-info btn-sm" />
+            <a asp-action="Index">Remove filter</a>
+        </p>
+    </div>
+</form>
 <div class="row">
     <div class="col-6">
         <h2 class="text-info"> Bikes</h2>
     </div>
     <div class="col-6 text-right">
-        <a asp-action="Create" class="btn btn-info"><i class="fa fa-motorcycle"></i> &nbsp;Add new Bike</a>
+        @if (User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Executive))
+        {
+            <a asp-action="Create" class="btn btn-info"><i class="fa fa-motorcycle"></i> &nbsp;Add new Bike</a>
+        }
     </div>
     <br />
     <div class="col-12">
@@ -20,31 +35,41 @@
             <tr>
                 <th> Bike Photo  </th>
                 <th> Bike Detail  </th>
-                <th> Price  </th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-sortOrder="@ViewBag.PriceSortParam"
+                       asp-route-pageNumber="@Model.PageNumber">Price</a>
+                </th>
                 <th> Seller Information  </th>
                 <th></th>
             </tr>
-            @foreach (var item in Model)
+            @foreach (var item in Model.Data)
             {
-        <tr>
-            <td><img src="@Html.DisplayFor(m => item.ImagePath)" width="100"  height="80" alt="Alternate Text" /></td>
-            <td>
-                <b> @Html.DisplayFor(m => item.Make.Name) @Html.DisplayFor(m => item.Year)</b><br />
-                <b> Model: @item.Model.Name</b><br />
-                <b> Milage: @item.Milage</b><br />
-            </td>
-            <td>
-                @item.Price @item.Currency
-            </td>
-            <td>
-                 <b> Name: @item.SellerName</b><br />
-                <b> Email: @item.SellerEmail</b><br />
-                <b> Phone: @item.SellerPhone</b><br />
-            </td>
-            <partial name="_TableButtonPartial" model="item.Id" />
-        </tr>
+                <tr>
+                    <td><img src="@Html.DisplayFor(m => item.ImagePath)" width="100" height="80" alt="Alternate Text" /></td>
+                    <td>
+                        <b> @Html.DisplayFor(m => item.Make.Name) @Html.DisplayFor(m => item.Year)</b><br />
+                        <b> Model: @item.Model.Name</b><br />
+                        <b> Milage: @item.Milage</b><br />
+                    </td>
+                    <td>
+                        @item.Price @item.Currency
+                    </td>
+                    <td>
+                        <b> Name: @item.SellerName</b><br />
+                        <b> Email: @item.SellerEmail</b><br />
+                        <b> Phone: @item.SellerPhone</b><br />
+                    </td>
+                    @if (User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Executive))
+                    {
+                        <partial name="_TableButtonPartial" model="item.Id" />
+                    }
+                </tr>
             }
         </table>
+        <partial name="_PaginationPartial"
+                 model="Model"
+                 view-data="ViewData" />
     </div>
 </div>
 
